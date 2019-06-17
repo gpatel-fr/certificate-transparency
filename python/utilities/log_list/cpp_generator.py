@@ -28,7 +28,7 @@ def _write_log_info_struct_definition(f):
 
 
 def split_and_hexify_binary_data(bin_data):
-    hex_data = "".join(["\\x%.2x" % ord(c) for c in bin_data])
+    hex_data = "".join(["\\x%.2x" % c for c in bytearray(bin_data)])
     # line_width % 4 must be 0 to avoid splitting the hex-encoded data
     # across '\' which will escape the quotation marks.
     line_width = 68
@@ -59,8 +59,8 @@ def _write_cpp_footer(f, include_guard):
 
 
 def _find_google_operator_id(json_log_list):
-    goog_operator = filter(
-        lambda op: op["name"] == "Google", json_log_list["operators"])
+    goog_operator = list(filter(
+        lambda op: op["name"] == "Google", json_log_list["operators"]))
     assert(len(goog_operator) == 1)
     return goog_operator[0]["id"]
 
@@ -76,7 +76,7 @@ def generate_cpp_header(json_log_list, output_file):
     google_operator_id = _find_google_operator_id(json_log_list)
     google_log_ids = []
     for log in logs:
-        log_key = base64.decodestring(log["key"])
+        log_key = base64.decodestring(log["key"].encode('utf-8'))
         split_hex_key = split_and_hexify_binary_data(log_key)
         s = "    {"
         s += "\n     ".join(split_hex_key)

@@ -27,7 +27,7 @@ def _write_java_header(output, package):
          "package": package})
 
 def _encode_key(description, key):
-    unsigned = (ord(c) for c in key)
+    unsigned = (c for c in bytearray(key))
     signed = (u - 256 if u > 127 else u for u in unsigned)
     array = textwrap.fill(", ".join("%d" % s for s in signed),
                           width=85,
@@ -45,7 +45,7 @@ def _encode_key(description, key):
 def _write_java_class(output, logs, class_name):
     descriptions = ('        "%s",\n' % log["description"] for log in logs)
     urls = ('        "%s",\n' % log["url"] for log in logs)
-    keys = (_encode_key(log["description"], base64.decodestring(log["key"]))
+    keys = (_encode_key(log["description"], base64.decodestring(log["key"].encode('utf-8')))
             for log in logs)
 
     output.write(
